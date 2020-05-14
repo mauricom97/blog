@@ -24,15 +24,38 @@ router.get('/categorias/add', (req, res) =>{
 
 
 router.post("/categorias/nova", (req, res) =>{
-    const novaCategoria = {
-        nome: req.body.nome,
-        slug: req.body.slug
+
+    var erros = []
+    if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null || req.body.nome == ''){
+        erros.push({texto: "Nome Invalido"})
     }
-    new Categoria(novaCategoria).save().then(() =>{
-        console.log("Salvo com sucesso!")
-    }).catch((erro) =>{
-        console.log("Erro ao salvar")
-    })
+
+    if(!req.body.slug || typeof req.body.slug == undefined || req.body.slug == null || req.body.slug == ''){
+        erros.push({texto: "Slug invalido"})
+    }
+
+    if(req.body.nome.length < 2){
+        erros.push({texto: "Nome da categoria com nome muito pequeno"})
+    }
+
+    if(erros.length > 0){
+       res.render("admin/addcategorias", {erros: erros})
+    }else{
+        const novaCategoria = {
+            nome: req.body.nome,
+            slug: req.body.slug
+        }
+        new Categoria(novaCategoria).save().then(() =>{
+            req.flash("success_msg", "Categoria salva com sucesso")
+            res.redirect("/admin/categorias")
+        }).catch((err) =>{
+            req.flash("error_msg", "Erro ao salvar categoria, tente novamente")
+            res.redirect("/admin")
+        })
+
+    }
+
+
 })
 
 module.exports = router;
