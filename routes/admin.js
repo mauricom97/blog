@@ -36,6 +36,16 @@ router.get("/categorias/edit/:id", (req, res) => {
     })
 })
 
+router.post("/categorias/deletar", (req, res) => {
+    Categoria.remove({_id: req.body.id}).then(() =>{
+        req.flash("success_msg", "Categoria deletada com sucesso")
+        res.redirect("/admin/categorias")
+    }).catch((err) => {
+        req.flash("error_msg", "Houve um erro ao deletar a categoria")
+        res.redirect("/admin/categorias")
+    })
+})
+
 
 router.post("/categorias/nova", (req, res) =>{
     var erros = []
@@ -75,11 +85,11 @@ router.post("/categorias/nova", (req, res) =>{
 router.post("/categorias/edit", (req, res) =>{
 const erros = []
     if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == '' || req.body.nome == null || req.body.nome <= 2){
-        erros.push({texto: "Nome invalido, insira o nome corretamente!"})
+        erros.push({texto: "O nome da categoria precisa estar preenchido!"})
     }
     
     if(!req.body.slug || typeof req.body.slug == undefined || req.body.slug == null || req.body.slug == '' || req.body.slug <= 2){
-        erros.push({texto: "Slug invalido"})
+        erros.push({texto: "O Slug precisa estar preenchido!"})
     }
 
     if(erros.length > 0){
@@ -101,7 +111,7 @@ const erros = []
             })
     
         }).catch((err) =>{
-            req.flash("error_msg", "houve um erro ao editar a categoria")
+            req.flash("error_msg", "Houve um erro ao editar a categoria!")
             res.redirect("/admin/categorias")
         })
         
@@ -110,6 +120,20 @@ const erros = []
 
     
 
+})
+
+router.get("/postagens", (req, res) => {
+    res.render("admin/postagens")
+})
+
+
+router.get("/postagens/add", (req, res) => {
+    Categoria.find().lean().then((categorias) => {
+        res.render("admin/addpostagem", {categorias: categorias})
+    }).catch((err) => {
+        req.flash("error_msg", "Houve um erro ao carregar o formulario")
+        res.redirect("/admin")
+    })
 })
 
 module.exports = router;
